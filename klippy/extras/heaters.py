@@ -64,6 +64,9 @@ class Heater:
         gcode.register_mux_command("SET_HEATER_TEMPERATURE", "HEATER",
                                    short_name, self.cmd_SET_HEATER_TEMPERATURE,
                                    desc=self.cmd_SET_HEATER_TEMPERATURE_help)
+        gcode.register_mux_command("SET_HEATER_MIN_EXTRUDE_TEMP", "HEATER",
+                                   self.name, self.cmd_SET_HEATER_MIN_EXTRUDE_TEMP,
+                                   desc=self.cmd_SET_HEATER_MIN_EXTRUDE_TEMP_help)
         self.printer.register_event_handler("klippy:shutdown",
                                             self._handle_shutdown)
     def set_pwm(self, read_time, value):
@@ -146,12 +149,19 @@ class Heater:
             smoothed_temp = self.smoothed_temp
             last_pwm_value = self.last_pwm_value
         return {'temperature': round(smoothed_temp, 2), 'target': target_temp,
-                'power': last_pwm_value}
+                'power': last_pwm_value, "min_temp": self.min_temp, "max_temp": self.max_temp,
+                'min_extrude_temp': self.min_extrude_temp}
     cmd_SET_HEATER_TEMPERATURE_help = "Sets a heater temperature"
     def cmd_SET_HEATER_TEMPERATURE(self, gcmd):
         temp = gcmd.get_float('TARGET', 0.)
         pheaters = self.printer.lookup_object('heaters')
         pheaters.set_temperature(self, temp)
+    cmd_SET_HEATER_MIN_EXTRUDE_TEMP_help = "Sets the min extrude temperature of heater"
+    def cmd_SET_HEATER_MIN_EXTRUDE_TEMP(self, gcmd):
+        temp = gcmd.get_float('TEMP', 0.)
+        self.min_extrude_temp = temp
+        self.can_extrude = (self.smoothed_temp >= self.min_extrude_temp)
+        gcmd.respond_info(f"heater {self.name}: min_extrude_temp set to {self.min_extrude_temp}")
 
 
 ######################################################################

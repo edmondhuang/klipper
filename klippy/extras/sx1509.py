@@ -45,10 +45,10 @@ class SX1509(object):
             self._oid, REG_RESET, 0x34))
         # Enable Oscillator
         self._mcu.add_config_cmd("i2c_write oid=%d data=%02x%02x" % (
-            self._oid, REG_CLOCK, (1 << 6)))
+            self._oid, REG_CLOCK, (5 << 6)))
         # Setup Clock Divider
         self._mcu.add_config_cmd("i2c_write oid=%d data=%02x%02x" % (
-            self._oid, REG_MISC, (1 << 4)))
+            self._oid, REG_MISC, (4 << 4)))
         # Transfer all regs with their initial cached state
         for _reg, _data in self.reg_dict.items():
             self._mcu.add_config_cmd("i2c_write oid=%d data=%02x%04x" % (
