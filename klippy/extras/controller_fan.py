@@ -26,6 +26,14 @@ class ControllerFan:
         self.heater_names = config.getlist("heater", ("extruder",))
         self.last_on = self.idle_timeout
         self.last_speed = 0.
+        gcode = self.printer.lookup_object('gcode')
+        name = config.get_name().split()[-1]
+        gcode.register_mux_command("SET_CTRL_FAN_SPEED", "CONTROLLER", name,
+                                   self.cmd_SET_CTLR_FAN_SPEED,
+                                   self.cmd_SET_CTLR_FAN_SPEED_help)
+        gcode.register_mux_command("GET_CTRL_FAN_SPEED", "CONTROLLER", name,
+                                   self.cmd_GET_CTLR_FAN_SPEED,
+                                   self.cmd_GET_CTLR_FAN_SPEED_help)
     def handle_connect(self):
         # Heater lookup
         pheaters = self.printer.lookup_object('heaters')
@@ -64,6 +72,15 @@ class ControllerFan:
             self.last_speed = speed
             self.fan.set_speed(speed)
         return eventtime + 1.
+    cmd_SET_CTLR_FAN_SPEED_help = "adjust controller fan speed"
+    def cmd_SET_CTLR_FAN_SPEED(self, gcmd):
+        speed = gcmd.get_float_arg("speed", self.fan_speed)
+        self.fan_speed = speed
+        self.last_speed = 0.
+        self.last_on = 0
+    cmd_GET_CTLR_FAN_SPEED_help = "get controller fan speed"
+    def cmd_GET_CTLR_FAN_SPEED(self, gcmd):
+        gcmd.respond_info(f"set speed is {self.fan_speed}")
 
 def load_config_prefix(config):
     return ControllerFan(config)
