@@ -4,7 +4,7 @@
 #
 # This file may be distributed under the terms of the GNU GPLv3 license.
 import traceback, logging, ast, copy, json, threading
-import jinja2, math
+import jinja2
 import configfile
 
 PYTHON_SCRIPT_PREFIX = "!"
@@ -286,7 +286,7 @@ class Template:
 class PrinterGCodeMacro:
     def __init__(self, config):
         self.printer = config.get_printer()
-        self.env = jinja2.Environment('{%', '%}', '{', '}')
+        self.env = jinja2.Environment('{%', '%}', '{', '}', extensions=["jinja2.ext.do"])
 
         self.gcode = self.printer.lookup_object("gcode")
         self.gcode.register_command(
@@ -302,38 +302,6 @@ class PrinterGCodeMacro:
         script = script.strip()
         #return TemplateWrapper(self.printer, self.env, name, script)
         return Template(self.printer, self.env, name, script)
-
-    def _action_emergency_stop(self, msg="action_emergency_stop"):
-        self.printer.invoke_shutdown("Shutdown due to %s" % (msg,))
-        return ""
-    def _action_respond_info(self, msg):
-        self.printer.lookup_object('gcode').respond_info(msg)
-        return ""
-
-    def _action_log(self, msg):
-        logging.info(msg)
-        return ""
-
-    def _action_raise_error(self, msg):
-        raise self.printer.command_error(msg)
-    def _action_call_remote_method(self, method, **kwargs):
-        webhooks = self.printer.lookup_object('webhooks')
-        try:
-            webhooks.call_remote_method(method, **kwargs)
-        except self.printer.command_error:
-            logging.exception("Remote Call Error")
-        return ""
-    def create_template_context(self, eventtime=None):
-        return {
-            #'printer': GetStatusWrapper(self.printer, eventtime),
-            "printer": GetStatusWrapperJinja(self.printer, eventtime),
-            'action_emergency_stop': self._action_emergency_stop,
-            'action_respond_info': self._action_respond_info,
-            'action_log': self._action_log,
-            'action_raise_error': self._action_raise_error,
-            'action_call_remote_method': self._action_call_remote_method,
-            "math": math,
-        }
 
     def cmd_RELOAD_GCODE_MACROS(self, gcmd):
         pconfig = configfile.PrinterConfig(self.printer)
@@ -351,6 +319,31 @@ class PrinterGCodeMacro:
                 template = obj.template
                 new_script = new_section.get("gcode").strip()
                 template.reload(new_script)
+
+    def _action_emergency_stop(self, msg="action_emergency_stop"):
+        self.printer.invoke_shutdown("Shutdown due to %s" % (msg,))
+        return ""
+    def _action_respond_info(self, msg):
+        self.printer.lookup_object('gcode').respond_info(msg)
+        return ""
+    def _action_raise_error(self, msg):
+        raise self.printer.command_error(msg)
+    def _action_call_remote_method(self, method, **kwargs):
+        webhooks = self.printer.lookup_object('webhooks')
+        try:
+            webhooks.call_remote_method(method, **kwargs)
+        except self.printer.command_error:
+            logging.exception("Remote Call Error")
+        return ""
+    def create_template_context(self, eventtime=None):
+        return {
+            #'printer': GetStatusWrapper(self.printer, eventtime),
+            "printer": GetStatusWrapperJinja(self.printer, eventtime),
+            'action_emergency_stop': self._action_emergency_stop,
+            'action_respond_info': self._action_respond_info,
+            'action_raise_error': self._action_raise_error,
+            'action_call_remote_method': self._action_call_remote_method,
+        }
 
 def load_config(config):
     return PrinterGCodeMacro(config)
