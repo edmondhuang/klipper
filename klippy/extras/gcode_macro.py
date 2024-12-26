@@ -7,6 +7,8 @@ import traceback, logging, ast, copy, json, threading
 import jinja2
 import configfile
 
+PYTHON_SCRIPT_PREFIX = "!"
+
 ######################################################################
 # Template handling
 ######################################################################
