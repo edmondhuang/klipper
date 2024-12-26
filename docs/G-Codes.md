@@ -667,12 +667,6 @@ enabled (also see the
 This command allows one to change the value of a gcode_macro variable
 at run-time. The provided VALUE is parsed as a Python literal.
 
-#### RELOAD_GCODE_MACROS
-`RELOAD_GCODE_MACROS`: This command reads the config files and reloads
-all previously loaded gcode templates. It does not load new `[gcode_macro]`
-objects or unload deleted ones. Variables modified with SET_GCODE_VARIABLE
-remain unaffected.
-
 ### [gcode_move]
 
 The gcode_move module is automatically loaded.
