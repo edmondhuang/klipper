@@ -223,7 +223,7 @@ class MCU_trsync:
             s.note_homing_end()
         return params['trigger_reason']
 
-TRSYNC_TIMEOUT = 0.025
+TRSYNC_TIMEOUT = 0.05 # https://docs.siboor.com/siboor-trident-june/faq-oct-17/new-cb2-timer-too-close This method, recommended by BigTreeTech, is an official solution to adjust the system’s tolerance and improve stability in more complex setups.
 TRSYNC_SINGLE_MCU_TIMEOUT = 0.250
 
 class TriggerDispatch:
