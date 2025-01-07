@@ -519,9 +519,9 @@ class ToolHead:
             curtime = self.reactor.monotonic()
             est_print_time = self.mcu.estimated_print_time(curtime)
             wait_time = self.print_time - est_print_time - flush_delay
-            if wait_time > 0. and self.can_pause:
+            if wait_time > 0.3 and self.can_pause:
                 # Pause before sending more steps
-                drip_completion.wait(curtime + wait_time)
+                drip_completion.wait(curtime + wait_time - 0.3)
                 continue
             npt = min(self.print_time + DRIP_SEGMENT_TIME, next_print_time)
             self.note_mcu_movequeue_activity(npt + self.kin_flush_delay,
