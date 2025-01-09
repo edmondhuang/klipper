@@ -224,7 +224,7 @@ class MCU_trsync:
         return params['trigger_reason']
 
 TRSYNC_TIMEOUT = 0.05 # https://docs.siboor.com/siboor-trident-june/faq-oct-17/new-cb2-timer-too-close This method, recommended by BigTreeTech, is an official solution to adjust the system’s tolerance and improve stability in more complex setups.
-TRSYNC_SINGLE_MCU_TIMEOUT = 0.250
+TRSYNC_SINGLE_MCU_TIMEOUT = 0.50 # Making sure value exists as kalico(danger klipper) does not have TRSYNC_TIMEOUT value
 
 class TriggerDispatch:
     def __init__(self, mcu):
